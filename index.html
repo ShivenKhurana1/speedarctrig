@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Arc Trig Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">Speed Trigonometry Practice</h1>
+        
+        <!-- Tabs Navigation -->
+        <div class="flex border-b border-gray-200 mb-6" id="tabs">
+            <button class="tab-btn px-4 py-2 font-medium text-sm rounded-t-lg text-indigo-600 border-b-2 border-indigo-600" data-tab="arc-trig">Arc Trig</button>
+            <button class="tab-btn px-4 py-2 font-medium text-sm text-gray-500 hover:text-indigo-600" data-tab="speed-trig">Speed Trig</button>
+            <button class="tab-btn px-4 py-2 font-medium text-sm text-gray-500 hover:text-indigo-600" data-tab="formulas">Formulas</button>
+        </div>
+        
+        <!-- Tab Content Container -->
+        <div class="min-h-96">
+            <!-- Arc Trig Tab -->
+            <div id="arc-trig-tab" class="tab-content">
+                <div id="start-screen" class="text-center">
+                    <p class="mb-6 text-gray-700">Complete 12 inverse trig questions in 2 minutes!</p>
+                    <button id="start-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Start Quiz
+                    </button>
+                </div>
+
+                <div id="quiz-container" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="timer" class="text-xl font-semibold text-gray-700">2:00</div>
+
+                        <!-- ✅ Add this score element -->
+                        <div id="score" class="text-xl font-semibold text-gray-700">
+                            Score: <span>0</span>
+                        </div>
+                    </div>
+                    
+                    <div id="question" class="text-2xl font-bold text-center mb-8 min-h-16 flex items-center justify-center"></div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-center space-x-2 mb-2">
+                            <button onclick="document.getElementById('answer').value += 'π'" 
+                                    class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                π
+                            </button>
+                        </div>
+                        <input type="text" id="answer" class="w-full p-3 border border-gray-300 rounded-lg text-center text-xl" 
+                               placeholder="Your answer (in radians or π)" autocomplete="off">
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button id="skip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                            Skip
+                        </button>
+                        <button id="submit-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+
+                <div id="result-screen" class="hidden text-center">
+                    <h2 class="text-2xl font-bold mb-4">Quiz Complete!</h2>
+                    <p class="text-xl mb-2">Your score: <span id="final-score" class="font-bold">0</span>/12</p>
+                    <p id="time-taken" class="text-lg mb-6"></p>
+                    <div id="answers" class="text-left mb-6 max-h-64 overflow-y-auto"></div>
+                    <button id="restart-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Try Again
+                    </button>
+                </div>
+            </div> <!-- End of arc-trig-tab -->
+            
+            <!-- Speed Trig Tab -->
+            <div id="speed-trig-tab" class="tab-content hidden">
+                <div id="speed-start-screen" class="text-center">
+                    <p class="mb-6 text-gray-700">Complete 12 trig questions in 2 minutes!</p>
+                    <button id="speed-start-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Start Speed Trig Quiz
+                    </button>
+                </div>
+
+                <div id="speed-quiz-container" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="speed-timer" class="text-xl font-semibold text-gray-700">2:00</div>
+                        <div id="speed-score" class="text-xl font-semibold text-gray-700">Score: <span>0</span></div>
+                    </div>
+                    
+                    <div id="speed-question" class="text-2xl font-bold text-center mb-8 min-h-16 flex items-center justify-center"></div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-center space-x-2 mb-2">
+                            <button onclick="document.getElementById('speed-answer').value += '√'" 
+                                    class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                √
+                            </button>
+                            <button onclick="document.getElementById('speed-answer').value += 'π'" 
+                                    class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                π
+                            </button>
+                        </div>
+                        <input type="text" id="speed-answer" class="w-full p-3 border border-gray-300 rounded-lg text-center text-xl" 
+                               placeholder="Your answer (as a fraction or decimal)" autocomplete="off">
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <button id="speed-skip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                            Skip
+                        </button>
+                        <button id="speed-submit-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+
+                <div id="speed-result-screen" class="hidden text-center">
+                    <h2 class="text-2xl font-bold mb-4">Quiz Complete!</h2>
+                    <p class="text-xl mb-2">Your score: <span id="speed-final-score" class="font-bold">0</span>/12</p>
+                    <p id="speed-time-taken" class="text-lg mb-6"></p>
+                    <div id="speed-answers" class="text-left mb-6 max-h-64 overflow-y-auto"></div>
+                    <button id="speed-restart-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        Try Again
+                    </button>
+                </div>
+            </div> <!-- End of speed-trig-tab -->
+            
+            <!-- Formulas Tab -->
+            <div id="formulas-tab" class="tab-content hidden p-6">
+                <h2 class="text-2xl font-bold mb-6 text-indigo-700">Trigonometry Reference</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Basic Trig Functions -->
+                    <div class="bg-gray-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-bold mb-3 text-indigo-600">Basic Trig Functions</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">sin(θ) = opposite/hypotenuse</p>
+                                <p class="text-sm text-gray-600">Sine function</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">cos(θ) = adjacent/hypotenuse</p>
+                                <p class="text-sm text-gray-600">Cosine function</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">tan(θ) = opposite/adjacent</p>
+                                <p class="text-sm text-gray-600">Tangent function</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reciprocal Trig Functions -->
+                    <div class="bg-gray-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-bold mb-3 text-indigo-600">Reciprocal Trig Functions</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">csc(θ) = 1/sin(θ)</p>
+                                <p class="text-sm text-gray-600">Cosecant</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">sec(θ) = 1/cos(θ)</p>
+                                <p class="text-sm text-gray-600">Secant</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">cot(θ) = 1/tan(θ)</p>
+                                <p class="text-sm text-gray-600">Cotangent</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Inverse Trig Functions -->
+                    <div class="bg-gray-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-bold mb-3 text-indigo-600">Inverse Trig Functions</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">arcsin(x) = θ where sin(θ) = x</p>
+                                <p class="text-sm text-gray-600">Arcsine (range: -π/2 to π/2)</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">arccos(x) = θ where cos(θ) = x</p>
+                                <p class="text-sm text-gray-600">Arccosine (range: 0 to π)</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">arctan(x) = θ where tan(θ) = x</p>
+                                <p class="text-sm text-gray-600">Arctangent (range: -π/2 to π/2)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pythagorean Identities -->
+                    <div class="bg-gray-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-bold mb-3 text-indigo-600">Pythagorean Identities</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">sin²(θ) + cos²(θ) = 1</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">1 + tan²(θ) = sec²(θ)</p>
+                            </div>
+                            <div class="p-3 bg-white rounded shadow">
+                                <p class="font-mono">1 + cot²(θ) = csc²(θ)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Common Values Table -->
+                <div class="mt-8 bg-blue-50 p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4 text-blue-700">Common Angle Values</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                            <thead class="bg-indigo-100">
+                                <tr>
+                                    <th class="px-4 py-2">Angle (rad)</th>
+                                    <th class="px-4 py-2">sin(θ)</th>
+                                    <th class="px-4 py-2">cos(θ)</th>
+                                    <th class="px-4 py-2">tan(θ)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 text-center">0</td>
+                                    <td class="px-4 py-2 text-center">0</td>
+                                    <td class="px-4 py-2 text-center">1</td>
+                                    <td class="px-4 py-2 text-center">0</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 text-center">π/6</td>
+                                    <td class="px-4 py-2 text-center">1/2</td>
+                                    <td class="px-4 py-2 text-center">√3/2</td>
+                                    <td class="px-4 py-2 text-center">√3/3</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 text-center">π/4</td>
+                                    <td class="px-4 py-2 text-center">√2/2</td>
+                                    <td class="px-4 py-2 text-center">√2/2</td>
+                                    <td class="px-4 py-2 text-center">1</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 text-center">π/3</td>
+                                    <td class="px-4 py-2 text-center">√3/2</td>
+                                    <td class="px-4 py-2 text-center">1/2</td>
+                                    <td class="px-4 py-2 text-center">√3</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 text-center">π/2</td>
+                                    <td class="px-4 py-2 text-center">1</td>
+                                    <td class="px-4 py-2 text-center">0</td>
+                                    <td class="px-4 py-2 text-center">∞</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div> <!-- End of formulas-tab -->
+        </div> <!-- End of tab content container -->
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<div class="w-full">
+    <div id="speed-start-screen" class="text-center">
+        <p class="mb-6 text-gray-700">Complete 12 trig questions in 2 minutes!</p>
+        <button id="speed-start-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+            Start Speed Trig Quiz
+        </button>
+    </div>
+
+    <div id="speed-quiz-container" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+            <div id="speed-timer" class="text-xl font-semibold text-gray-700">2:00</div>
+            <div id="speed-score" class="text-xl font-semibold text-gray-700">Score: <span>0</span></div>
+        </div>
+        
+        <div id="speed-question" class="text-2xl font-bold text-center mb-8 min-h-16 flex items-center justify-center"></div>
+        
+        <div class="mb-6">
+            <input type="text" id="speed-answer" class="w-full p-3 border border-gray-300 rounded-lg text-center text-xl" 
+                   placeholder="Your answer (as a fraction or decimal)" autocomplete="off">
+        </div>
+        
+        <div class="flex justify-between">
+            <button id="speed-skip-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                Skip
+            </button>
+            <button id="speed-submit-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                Submit
+            </button>
+        </div>
+    </div>
+
+    <div id="speed-result-screen" class="hidden text-center">
+        <h2 class="text-2xl font-bold mb-4">Quiz Complete!</h2>
+        <p class="text-xl mb-2">Your score: <span id="speed-final-score" class="font-bold">0</span>/12</p>
+        <p id="speed-time-taken" class="text-lg mb-6"></p>
+        <div id="speed-answers" class="text-left mb-6 max-h-64 overflow-y-auto"></div>
+        <button id="speed-restart-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+            Try Again
+        </button>
+    </div>
+</div>
