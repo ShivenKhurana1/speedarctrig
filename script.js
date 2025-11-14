@@ -104,11 +104,20 @@ function formatRadians(rad) {
 }
 
 function formatValue(v) {
-  // display many common exact forms, otherwise present short decimal
+  // display all common exact forms, avoid decimals
   if (!isFinite(v)) return '∞';
+  if (Math.abs(v - 0) < 1e-10) return '0';
+  if (Math.abs(v - 1) < 1e-10) return '1';
+  if (Math.abs(v + 1) < 1e-10) return '-1';
+  if (Math.abs(v - 2) < 1e-10) return '2';
+  if (Math.abs(v + 2) < 1e-10) return '-2';
+  
   const r2 = Math.SQRT2/2;
   const r3 = Math.sqrt(3)/2;
   const t3 = Math.sqrt(3)/3;
+  const sqrt2 = Math.sqrt(2);
+  const sqrt3 = Math.sqrt(3);
+  
   if (Math.abs(v - 0.5) < 1e-10) return '1/2';
   if (Math.abs(v + 0.5) < 1e-10) return '-1/2';
   if (Math.abs(v - r2) < 1e-10) return '√2/2';
@@ -117,18 +126,57 @@ function formatValue(v) {
   if (Math.abs(v + r3) < 1e-10) return '-√3/2';
   if (Math.abs(v - t3) < 1e-10) return '√3/3';
   if (Math.abs(v + t3) < 1e-10) return '-√3/3';
-  // otherwise use compact decimal (up to 6 digits)
-  return Number.isInteger(v) ? String(v) : String(Number(v.toPrecision(6)));
+  if (Math.abs(v - sqrt2) < 1e-10) return '√2';
+  if (Math.abs(v + sqrt2) < 1e-10) return '-√2';
+  if (Math.abs(v - sqrt3) < 1e-10) return '√3';
+  if (Math.abs(v + sqrt3) < 1e-10) return '-√3';
+  if (Math.abs(v - 2/sqrt3) < 1e-10) return '2√3/3';
+  if (Math.abs(v + 2/sqrt3) < 1e-10) return '-2√3/3';
+  
+  // Try to express as a simple fraction
+  const frac = toFraction(v);
+  return frac;
 }
 
 // =======================================================
-// PARSE USER INPUTS (π / 'und' / ∞ ...)
+// PARSE USER INPUTS (π / 'und' / ∞ / √ ...)
 // =======================================================
 function normalizeInfOrUndToken(s) {
   if (!s) return null;
   const x = s.trim().toLowerCase();
   if (['∞','inf','infty','infinity','undefined','und','undef'].includes(x)) return 'UND'; // sentinel
   return null;
+}
+
+function parseSqrtInput(text) {
+  if (typeof text !== 'string') return NaN;
+  let t = text.trim().toLowerCase();
+  if (t === '') return NaN;
+  
+  // Replace sqrt notation with actual values
+  // Handle patterns like: sqrt(2), sqrt2, sqrt(3), sqrt3, etc.
+  t = t.replace(/sqrt\s*\(\s*2\s*\)/g, String(Math.sqrt(2)));
+  t = t.replace(/sqrt\s*\(\s*3\s*\)/g, String(Math.sqrt(3)));
+  t = t.replace(/sqrt2/g, String(Math.sqrt(2)));
+  t = t.replace(/sqrt3/g, String(Math.sqrt(3)));
+  
+  // Replace √ symbols with actual values
+  t = t.replace(/√2/g, String(Math.sqrt(2)));
+  t = t.replace(/√3/g, String(Math.sqrt(3)));
+  
+  // Now evaluate as a simple mathematical expression
+  // Handle fractions like "sqrt(2)/2" or "1/2"
+  if (t.includes('/')) {
+    const parts = t.split('/');
+    if (parts.length === 2) {
+      const n = parseFloat(parts[0]);
+      const d = parseFloat(parts[1]);
+      if (!isNaN(n) && !isNaN(d) && d !== 0) return n / d;
+    }
+  }
+  
+  // Handle negative signs
+  return parseFloat(t);
 }
 
 function parsePiInput(text) {
@@ -140,7 +188,11 @@ function parsePiInput(text) {
   if (special === 'UND') return Infinity;
   // Accept plain infinity symbols
   if (['∞','inf','infty','infinity'].includes(t.toLowerCase())) return Infinity;
-  // Accept numeric direct
+  
+  // Normalize "pi" to "π" so we can handle both forms
+  t = t.replace(/pi/gi, 'π');
+  
+  // Accept numeric direct (no π)
   if (!t.includes('π')) {
     // allow common fraction forms like 1/2
     if (t.includes('/')) {
@@ -153,13 +205,37 @@ function parsePiInput(text) {
     }
     return parseFloat(t);
   }
-  // contains π: accept patterns like 'π', '-π', '3π/4', '1/2π', '2π'
+  
+  // contains π: accept patterns like 'π', '-π', '3π/4', 'π/2', '2π/3'
   t = t.replace(/\s+/g, '');
-  // remove the pi symbol and consider what's left
+  
+  // Handle patterns like '2π/3' (coefficient before π, then division)
+  // First check if there's a slash after π
+  const slashAfterPi = t.indexOf('/');
+  if (slashAfterPi > 0 && t.indexOf('π') < slashAfterPi) {
+    // Pattern like '2π/3' or 'π/2'
+    const beforeSlash = t.substring(0, slashAfterPi); // '2π' or 'π'
+    const afterSlash = t.substring(slashAfterPi + 1); // '3' or '2'
+    
+    // Remove π from the before part
+    const coef = beforeSlash.replace('π', '');
+    let numerator;
+    if (coef === '' || coef === '+') numerator = 1;
+    else if (coef === '-') numerator = -1;
+    else numerator = parseFloat(coef);
+    
+    const denominator = parseFloat(afterSlash);
+    if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+      return (numerator / denominator) * Math.PI;
+    }
+  }
+  
+  // Handle other patterns: 'π', '-π', '2π' etc (no slash after π)
   const before = t.replace('π','');
   if (before === '' || before === '+') return Math.PI;
   if (before === '-') return -Math.PI;
-  // if it is a fraction like '3/4' => 3/4 * π
+  
+  // if it is a fraction like 'π/2' => π/2 (already handled above, but keep for safety)
   if (before.includes('/')) {
     const parts = before.split('/');
     if (parts.length === 2) {
@@ -168,7 +244,8 @@ function parsePiInput(text) {
       if (!isNaN(n) && !isNaN(d) && d !== 0) return (n/d) * Math.PI;
     }
   }
-  // otherwise parse numeric multiplier
+  
+  // otherwise parse numeric multiplier like '2π' => 2 * π
   const n = parseFloat(before);
   return isNaN(n) ? NaN : n * Math.PI;
 }
@@ -177,15 +254,33 @@ function parsePiInput(text) {
 // QUESTION GENERATORS
 // =======================================================
 function generateArcTrigQuestion() {
-  // inverse trig: arcsin(x), arccos(x), arctan(x)
-  const funcs = ['arcsin','arccos','arctan'];
-  const func = funcs[Math.floor(Math.random()*funcs.length)];
-  const angle = commonAngles[Math.floor(Math.random()*commonAngles.length)];
-
-  let val;
-  if (func === 'arcsin') val = angle.sin;
-  else if (func === 'arccos') val = angle.cos;
-  else if (func === 'arctan') val = angle.tan;
+  // inverse trig: arcsin, arccos, arctan, arcsec, arccsc, arccot
+  const funcs = ['arcsin','arccos','arctan','arcsec','arccsc','arccot'];
+  
+  let func, angle, val;
+  let attempts = 0;
+  const maxAttempts = 50;
+  
+  // Keep trying until we get a valid combination (no infinity arguments)
+  do {
+    func = funcs[Math.floor(Math.random()*funcs.length)];
+    angle = commonAngles[Math.floor(Math.random()*commonAngles.length)];
+    
+    if (func === 'arcsin') val = angle.sin;
+    else if (func === 'arccos') val = angle.cos;
+    else if (func === 'arctan') val = angle.tan;
+    else if (func === 'arcsec') val = (angle.cos === 0 ? Infinity : 1/angle.cos);
+    else if (func === 'arccsc') val = (angle.sin === 0 ? Infinity : 1/angle.sin);
+    else if (func === 'arccot') val = (angle.tan === 0 ? Infinity : 1/angle.tan);
+    
+    attempts++;
+  } while (!isFinite(val) && attempts < maxAttempts);
+  
+  // Fallback to arcsin if we somehow still have infinity
+  if (!isFinite(val)) {
+    func = 'arcsin';
+    val = angle.sin;
+  }
 
   return {
     func,
@@ -199,16 +294,31 @@ function generateArcTrigQuestion() {
 
 function generateSpeedQuestion() {
   const funcs = ['sin','cos','tan','csc','sec','cot'];
-  const func = funcs[Math.floor(Math.random()*funcs.length)];
-  const angle = commonAngles[Math.floor(Math.random()*commonAngles.length)];
-
-  let val;
-  if (func === 'sin') val = angle.sin;
-  if (func === 'cos') val = angle.cos;
-  if (func === 'tan') val = angle.tan;
-  if (func === 'csc') val = (angle.sin === 0 ? Infinity : 1/angle.sin);
-  if (func === 'sec') val = (angle.cos === 0 ? Infinity : 1/angle.cos);
-  if (func === 'cot') val = (angle.tan === 0 ? Infinity : 1/angle.tan);
+  
+  let func, angle, val;
+  let attempts = 0;
+  const maxAttempts = 50;
+  
+  // Keep trying until we get a valid combination (no infinity answers)
+  do {
+    func = funcs[Math.floor(Math.random()*funcs.length)];
+    angle = commonAngles[Math.floor(Math.random()*commonAngles.length)];
+    
+    if (func === 'sin') val = angle.sin;
+    else if (func === 'cos') val = angle.cos;
+    else if (func === 'tan') val = angle.tan;
+    else if (func === 'csc') val = (angle.sin === 0 ? Infinity : 1/angle.sin);
+    else if (func === 'sec') val = (angle.cos === 0 ? Infinity : 1/angle.cos);
+    else if (func === 'cot') val = (angle.tan === 0 ? Infinity : 1/angle.tan);
+    
+    attempts++;
+  } while (!isFinite(val) && attempts < maxAttempts);
+  
+  // Fallback to sin if we somehow still have infinity
+  if (!isFinite(val)) {
+    func = 'sin';
+    val = angle.sin;
+  }
 
   return {
     func,
@@ -300,7 +410,7 @@ function checkSpeedAnswer() {
   const special = normalizeInfOrUndToken(raw);
   let userVal;
   if (special === 'UND') userVal = Infinity;
-  else userVal = parseFloat(raw.replace(/,/g, ''));
+  else userVal = parseSqrtInput(raw);
 
   const correct = speedCurrentQuestion.answer;
   let isCorrect = false;
